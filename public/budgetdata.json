@@ -1,0 +1,27 @@
+[
+    {
+        "id": 1,
+        "budgeted": 500,
+        "spent": 200,
+        "category": "Food"
+    },
+    {
+        "id": 2,
+        "budgeted": 1000,
+        "spent": 1500,
+        "category": "Utilities"
+    },
+    {
+        "id": 3,
+        "budgeted": 20,
+        "spent": 100,
+        "category": "Car"
+    },
+    {
+        "id": 4,
+        "budgeted": 5,
+        "spent": 2500,
+        "category": "House"
+    }
+
+]
