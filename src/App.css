@@ -1,0 +1,36 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+table {
+  display: flex;
+  justify-content: center;
+  border: 1px solid gray;
+  margin: 5vh;
+}
+
+td {
+  border: 1px solid gray;
+  width: 30em;
+}
+
+.Budget-Overview {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.Table-Header {
+  background-color: #96bb7c;
+}
