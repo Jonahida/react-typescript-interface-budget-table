@@ -38,31 +38,40 @@ This will start the development server and open the application in your default 
 The `App` component initializes the budget data and renders the `BudgetOverview` component.
 
 ```tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
-import { BudgetOverview } from "./BudgetOverview";
-
-const homeBudgets = [
-    {
-        budgeted: 500,
-        spent: 200,
-        category: "Food",
-    },
-    {
-        budgeted: 1000,
-        spent: 1500,
-        category: "Utilities",
-    }
-]
+import { BudgetOverview } from './BudgetOverview';
 
 function App() {
+    // Initialize state variable to hold budget data
+    const [budgetData, setBudgetData] = useState([]);
+
+    // Fetch budget data from JSON file when component mounts
+    useEffect(() => {
+        // Fetch budget data from JSON file
+        fetch('./budgetdata.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch budget data');
+                }
+                return response.json(); // Parse JSON response
+            })
+            .then(data => setBudgetData(data)) // Update state with fetched data
+            .catch(error => console.error('Error fetching budget data:', error)); // Log error if fetching fails
+    }, []); // Empty dependency array ensures effect runs only once after component mounts
+
     return (
         <div className="App">
+            {/* Header */}
             <header className="App-header">Budget Table using TypeScript & React</header>
-            <BudgetOverview budgets={homeBudgets} />
+            
+            {/* Render BudgetOverview component with fetched budget data */}
+            <BudgetOverview budgets={budgetData} />
         </div>
     );
 }
+
+export default App;
 ```
 
 ### `BudgetOverview` and `Budgetitem` components
@@ -76,57 +85,64 @@ interface BudgetProps {
     budgets: Budget[];
 }
 
-export const BudgetOverview: React.FC<BudgetProps> = ({ budgets }: BudgetProps) => {
+export const BudgetOverview: React.FC<BudgetProps> = ({budgets}: BudgetProps) => {
     return <div className="Budget-Overview">
         <table>
             <tbody>
-                <tr className="Table-Header">
-                    <td>
-                        <h4>CATEGORY</h4>
-                    </td>
-                    <td>
-                        <h4>BUDGETED</h4>
-                    </td>
-                    <td>
-                        <h4>SPENT</h4>
-                    </td>
-                    <td>
-                        <h4>REMAINING</h4>
-                    </td>
-                </tr>
-                {budgets.map((item, index) => (
-                    <BudgetItem 
-                        key={index}
-                        budgeted={item.budgeted}
-                        spent={item.spent}
-                        category={item.category} 
-                    />
-                ))}
+            <tr className="Table-Header">
+                <td>
+                    <h4>ID</h4>
+                </td>
+                <td>
+                    <h4>CATEGORY</h4>
+                </td>
+                <td>
+                    <h4>BUDGETED</h4>
+                </td>
+                <td>
+                    <h4>SPENT</h4>
+                </td>
+                <td>
+                    <h4>REMAINING</h4>
+                </td>
+            </tr>
+            {budgets.map(item => (
+                <BudgetItem 
+                    id={item.id}
+                    budgeted={item.budgeted}
+                    spent={item.spent}
+                    category={item.category} 
+                />
+            ))}
             </tbody>
         </table>
     </div>
 }
 
 interface BudgetItemProps {
+    id: number;
     budgeted: number;
     spent: number;
     category: string;
 }
 
-const BudgetItem: React.FC<BudgetItemProps> = ({ category, budgeted, spent }) => {
+const BudgetItem: React.FC<BudgetItemProps> = ({id, category, budgeted, spent}) => {
     const remainingAmount: number = budgeted - spent;
     return <tr>
+        <td>
+            <h5>{id}</h5>
+        </td>
         <td>
             <h5>{category}</h5>
         </td>
         <td>
-            <h5>{"$" + budgeted}</h5>
+            <h5>{"$ " + budgeted}</h5>
         </td>
         <td>
-            <h5>{"$" + spent}</h5>
+            <h5>{"$ " + spent}</h5>
         </td>
         <td>
-            <h5 style={{color: remainingAmount >= 0 ? 'green' : 'red' }}>{"$" + remainingAmount}</h5>
+            <h5 style={{color: remainingAmount >= 0 ? 'green' : 'red' }}>$ {(remainingAmount < 0) ? Math.abs(remainingAmount) : remainingAmount}</h5>
         </td>
     </tr>
 }
@@ -145,99 +161,4 @@ interface Budget {
 export default Budget;
 ```
 
-### Changes from original project
-This project builds upon the code provided in the original repository. Key changes include:
-
-1. Original project run using `yarn` and this one is using `npm`. In terms of functionality, both **Yarn** and **npm** achieve the same goal of managing project dependencies and scripts. However, there are differences in their implementation, features, and commands.
-
-2. Self-closing BudgetItem Tag: Ensured BudgetItem is used as a self-closing tag to prevent unintended children prop being passed.
-
-#### Original:
-```tsx
-{budgets.map(item => {
-    return <BudgetItem budgeted={item.budgeted}
-                       spent={item.spent}
-                       category={item.category}>
-    </BudgetItem>
-})}
-```
-#### Modified:
-```tsx
-Copy code
-{budgets.map((item, index) => (
-    <BudgetItem 
-        key={index}
-        budgeted={item.budgeted}
-        spent={item.spent}
-        category={item.category} 
-    />
-))}
-```
-
-3. Explicit Props Definition for BudgetItem: Introduced a separate BudgetItemProps interface for BudgetItem props.
-
-#### Original:
-```tsx
-Copy code
-const BudgetItem: React.FC<Budget> = ({ category, budgeted, spent }: Budget) => { ... }
-```
-
-#### Modified:
-```tsx
-interface BudgetItemProps {
-    budgeted: number;
-    spent: number;
-    category: string;
-}
-
-const BudgetItem: React.FC<BudgetItemProps> = ({ category, budgeted, spent }) => { ... }
-```
-
-4. This project displays negative values in red instead of forcing negative values to 0.
-
-
-#### Original:
-```tsx
-...
-const BudgetItem: React.FC<BudgetItemProps> = ({ category, budgeted, spent }) => {
-    const remainingAmount: number = (budgeted - spent) > 0 ? (budgeted - spent) : 0;
-    return <tr>
-        <td>
-            <h5>{category}</h5>
-        </td>
-        <td>
-            <h5>{"$" + budgeted}</h5>
-        </td>
-        <td>
-            <h5>{"$" + spent}</h5>
-        </td>
-        <td>
-            <h5>{"$" + remainingAmount}</h5>
-        </td>
-    </tr>
-}
-```
-
-#### Modified:
-```tsx
-...
-const BudgetItem: React.FC<BudgetItemProps> = ({ category, budgeted, spent }) => {
-    const remainingAmount: number = budgeted - spent;
-    return <tr>
-        <td>
-            <h5>{category}</h5>
-        </td>
-        <td>
-            <h5>{"$" + budgeted}</h5>
-        </td>
-        <td>
-            <h5>{"$" + spent}</h5>
-        </td>
-        <td>
-            <h5 style={{color: remainingAmount >= 0 ? 'green' : 'red' }}>{"$" + remainingAmount}</h5>
-        </td>
-    </tr>
-}
-```
-
-These changes ensure type safety and code clarity, following best practices for using TypeScript with React.
+### Go to the first commit to track changes from original project
